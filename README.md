@@ -1,7 +1,7 @@
 tech-debt-NLP-analysis
 ==============================
 
-Natural Language Processing analysis of developers' written messages in the Technical Debt Database.
+Natural Language Processing analysis of developers' written messages in the Technical Debt Database to predict issues' difficulty.
 
 Project Organization
 ------------
