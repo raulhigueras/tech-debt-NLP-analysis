@@ -14,3 +14,4 @@ numpy
 # sqlite3 (included with python3)
 matplotlib
 wordcloud
+nltk
