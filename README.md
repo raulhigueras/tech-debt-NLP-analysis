@@ -1,9 +1,55 @@
-tech-debt-NLP-analysis
-==============================
+# tech-debt-NLP-analysis
 
 Natural Language Processing analysis of developers' written messages in the Technical Debt Database to predict issues' difficulty.
 
-Project Organization
+## Table of Content
+
+1. [Project Status](#project-status)
+2. [Instructions of Use](#instructions-of-use)
+3. [Project Organization](#project-organization)
+
+
+## Project Status
+
+- [x] Problem Understanding
+- [x] Data Exploration 
+- [ ] Data Preprocessing
+- [ ] Modeling
+- [ ] Evaluation
+- [ ] Deploy
+
+
+## Instructions of use
+
+### Setup
+First of all, run the following command to install all the python libraries needed.
+```{bash}
+make requirements
+```
+
+### Data Exploration
+The data exploration part is all contained in the notebook `001-exploration.ipnb`. To see the whole analysis, just run the notebook from the start of the document.
+
+> ❗️ Warning
+>
+> Make sure to include both versions of the databases (`td_V1.bd` and `td_V2.bd`) in the folder `data/raw`.
+
+### 🚧 Data Preprocessing 🚧
+To generate the processed dataset, run the following command:
+```{bash}
+make data
+```
+
+### 🚧 Modeling 🚧
+WIP
+
+### 🚧 Evaluation 🚧
+WIP
+
+### 🚧 Deploy 🚧
+WIP
+
+## Project Organization
 ------------
 
     ├── LICENSE
