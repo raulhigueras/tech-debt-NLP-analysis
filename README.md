@@ -13,7 +13,7 @@ Natural Language Processing analysis of developers' written messages in the Tech
 
 - [x] Problem Understanding
 - [x] Data Exploration 
-- [ ] Data Preprocessing
+- [x] Data Preprocessing
 - [ ] Modeling
 - [ ] Evaluation
 - [ ] Deploy
@@ -28,17 +28,19 @@ make requirements
 ```
 
 ### Data Exploration
-The data exploration part is all contained in the notebook `001-exploration.ipnb`. To see the whole analysis, just run the notebook from the start of the document.
+The data exploration part is all contained in the notebook `001-exploration.ipynb`. To see the whole analysis, just run the notebook from the start of the document.
 
 > ❗️ Warning
 >
 > Make sure to include both versions of the databases (`td_V1.bd` and `td_V2.bd`) in the folder `data/raw`.
 
-### 🚧 Data Preprocessing 🚧
+### Data Preprocessing 
 To generate the processed dataset, run the following command:
 ```{bash}
 make data
 ```
+
+The NLP preprocessing techniques are detailed and explained in the notebook `002-preprocessing.ipynb`.
 
 ### 🚧 Modeling 🚧
 WIP
