@@ -15,3 +15,5 @@ numpy
 matplotlib
 wordcloud
 nltk
+gensim
+pyLDAvis==3.2.1
