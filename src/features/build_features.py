@@ -14,10 +14,11 @@ import nltk
 
 #nltk.download('punkt')
 #nltk.download('stopwords')
+nltk.download('wordnet')
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer, SnowballStemmer
+from nltk.stem import WordNetLemmatizer
 
 
 def unifyStyle(txts):
@@ -52,8 +53,8 @@ def removeStopwordsandStemmer(txts):
     sw = stopwords.words('english')
     words_wo_sw = [[word for word in txt if word not in sw] for txt in words]
 
-    stemmer = SnowballStemmer('english')
-    words_wo_sw = [ [ stemmer.stem(w) for w in txt] for txt in words_wo_sw  ]
+    lemmatizer = WordNetLemmatizer()
+    words_wo_sw = [ [ lemmatizer.lemmatize(w) for w in txt] for txt in words_wo_sw  ]
 
     txts = pd.Series([' '.join(txt) for txt in words_wo_sw])
 
