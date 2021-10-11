@@ -12,11 +12,12 @@ import requests
 import zipfile
 import nltk
 
-nltk.download('punkt')
-nltk.download('stopwords')
+#nltk.download('punkt')
+#nltk.download('stopwords')
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
 
 
 def unifyStyle(txts):
@@ -45,11 +46,15 @@ def unifyStyle(txts):
     return txts    
 
 
-def removeStopwords(txts):
+def removeStopwordsandStemmer(txts):
     words = [word_tokenize(txt) for txt in txts]
 
     sw = stopwords.words('english')
     words_wo_sw = [[word for word in txt if word not in sw] for txt in words]
+
+    stemmer = SnowballStemmer('english')
+    words_wo_sw = [ [ stemmer.stem(w) for w in txt] for txt in words_wo_sw  ]
+
     txts = pd.Series([' '.join(txt) for txt in words_wo_sw])
 
     return txts
@@ -57,7 +62,6 @@ def removeStopwords(txts):
 
 def removeProjectSpecificTerms(txts, project_names):
     project_names_re = r'|'.join(project_names)
-    print(project_names_re)
     txts = txts.apply( lambda txt: re.sub(project_names_re, ' ', str(txt)) )
 
     return txts
@@ -84,13 +88,13 @@ def main(data_src, interim_filepath, output_filepath):
     df['summary'] = unifyStyle(df['summary'])
     df['description'] = unifyStyle(df['description'])
 
-    df['summary'] = removeStopwords(df['summary'])
-    df['description'] = removeStopwords(df['description'])
+    df['summary'] = removeStopwordsandStemmer(df['summary'])
+    df['description'] = removeStopwordsandStemmer(df['description'])
 
     df['summary'] = removeProjectSpecificTerms(df['summary'], pnames)
     df['description'] = removeProjectSpecificTerms(df['description'], pnames)
 
-    df['text'] = df['summary'] + df['description']
+    df['text'] = df['summary'] + ' ' + df['description']
 
     logger.info("Done! Saving intermediate dataset with preprocessed text")
     df['text'].to_csv(f"{interim_filepath}/preproc_text.csv")
