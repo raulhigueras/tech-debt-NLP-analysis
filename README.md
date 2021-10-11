@@ -40,10 +40,13 @@ To generate the processed dataset, run the following command:
 make data
 ```
 
-The NLP preprocessing techniques are detailed and explained in the notebook `002-preprocessing.ipynb`.
+The NLP preprocessing techniques are detailed and explained in the notebook `002-preprocessing.ipynb`. Those techniques are implemented just after the modelling step, and can be executed following the instructions at [Modeling](###modeling).
 
 ### 🚧 Modeling 🚧
-WIP
+To generate the features, run the followig command:
+```{bash}
+make features
+```
 
 ### 🚧 Evaluation 🚧
 WIP
