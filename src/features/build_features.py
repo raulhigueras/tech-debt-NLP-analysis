@@ -72,8 +72,7 @@ def removeProjectSpecificTerms(txts, project_names):
 @click.command()
 @click.argument('data_src', type=click.Path(exists=True))
 @click.argument('interim_filepath', type=click.Path())
-@click.argument('output_filepath', type=click.Path())
-def main(data_src, interim_filepath, output_filepath):
+def main(data_src, interim_filepath):
 
     logger = logging.getLogger(__name__)
 
