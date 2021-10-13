@@ -37,9 +37,9 @@ def unifyStyle(txts):
     txts = txts.apply( lambda txt: txt.replace('\n', ' '))
     txts = txts.apply( lambda txt: re.sub(brackets_re, '', txt) )
     txts = txts.apply( lambda txt: re.sub(URL_re, 'URL', txt) )
-    txts = txts.apply( lambda txt: re.sub(PATH_re, 'PATH', txt) )
-    txts = txts.apply( lambda txt: re.sub(version_re, 'VERSION', txt) )
-    txts = txts.apply( lambda txt: re.sub(file_re, 'FILE', txt) )
+    txts = txts.apply( lambda txt: re.sub(PATH_re, ' ', txt) )
+    txts = txts.apply( lambda txt: re.sub(version_re, ' ', txt) )
+    txts = txts.apply( lambda txt: re.sub(file_re, ' ', txt) )
     txts = txts.apply( lambda txt: re.sub(date_re, 'DATE', txt) )
     txts = txts.apply( lambda txt: re.sub(punctuation_re, ' ', txt) )
     txts = txts.apply( lambda txt: re.sub(multiplespace_re, ' ', txt) )
@@ -52,9 +52,10 @@ def removeStopwordsandStemmer(txts):
 
     sw = stopwords.words('english')
     words_wo_sw = [[word for word in txt if word not in sw] for txt in words]
+    words_wo_sw = [[word for word in txt if not word.isnumeric()] for txt in words_wo_sw]
 
     lemmatizer = WordNetLemmatizer()
-    words_wo_sw = [ [ lemmatizer.lemmatize(w) for w in txt] for txt in words_wo_sw  ]
+    words_wo_sw = [[lemmatizer.lemmatize(w) for w in txt] for txt in words_wo_sw ]
 
     txts = pd.Series([' '.join(txt) for txt in words_wo_sw])
 
@@ -63,7 +64,7 @@ def removeStopwordsandStemmer(txts):
 
 def removeProjectSpecificTerms(txts, project_names):
     project_names_re = r'|'.join(project_names)
-    txts = txts.apply( lambda txt: re.sub(project_names_re, ' ', str(txt)) )
+    txts = txts.apply(lambda txt: re.sub(project_names_re, ' ', str(txt)))
 
     return txts
 
@@ -75,7 +76,7 @@ def removeProjectSpecificTerms(txts, project_names):
 def main(data_src, interim_filepath, output_filepath):
 
     logger = logging.getLogger(__name__)
-    
+
 
     logger.info("Reading processed dataset...")
     df = pd.read_csv(data_src, index_col=0)
@@ -96,10 +97,11 @@ def main(data_src, interim_filepath, output_filepath):
     df['description'] = removeProjectSpecificTerms(df['description'], pnames)
 
     df['text'] = df['summary'] + ' ' + df['description']
+    df.drop(columns=['summary', 'description'])
 
     logger.info("Done! Saving intermediate dataset with preprocessed text")
-    df['text'].to_csv(f"{interim_filepath}/preproc_text.csv")
-    logger.info(f"Saved in {interim_filepath}/preproc_text.csv")
+    df.to_csv(f"{interim_filepath}/preproc.csv")
+    logger.info(f"Saved in {interim_filepath}/preproc.csv")
 
 
 if __name__ == '__main__':
