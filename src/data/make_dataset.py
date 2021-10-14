@@ -6,6 +6,7 @@ from dotenv import find_dotenv, load_dotenv
 
 # my imports
 import os
+import shutil as sh
 import sqlite3
 import pandas as pd
 import requests
@@ -42,9 +43,12 @@ def download_data_from_github(folder_path):
         if len(my_file) > 0:
             name_of_file = my_file[0]
 
-        zip_ref.extract(name_of_file, f"{folder_path}/{VERSION1}")
+        zip_ref.extract(name_of_file, f"{folder_path}/data")
+    
+    sh.move(f"{folder_path}/data/*.db", f"{folder_path}/{VERSION1}")
 
     os.remove(f"{folder_path}/{VERSION1}.zip")
+    os.remove(f"{folder_path}/data")
 
     # get the database of the v2
     r = requests.get(link_v2)
@@ -163,7 +167,7 @@ def add_changes_metrics(df, connection):
 @click.argument('output_filepath', type=click.Path())
 def main(input_filepath, output_filepath):
     """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+        cleaned data ready to be analyzed (saved in ../interim).
     """
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
