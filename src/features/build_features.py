@@ -96,7 +96,7 @@ def main(data_src, interim_filepath):
     df['description'] = removeProjectSpecificTerms(df['description'], pnames)
 
     df['text'] = df['summary'] + ' ' + df['description']
-    df.drop(columns=['summary', 'description'])
+    df = df.drop(columns=['summary', 'description'])
 
     logger.info("Done! Saving intermediate dataset with preprocessed text")
     df.to_csv(f"{interim_filepath}/preproc.csv")
