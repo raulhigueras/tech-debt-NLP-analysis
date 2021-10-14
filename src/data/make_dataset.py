@@ -9,6 +9,7 @@ import os
 import shutil as sh
 import sqlite3
 import pandas as pd
+import datetime as dt
 import requests
 import zipfile
 
@@ -85,14 +86,15 @@ def get_insert(version):
     raise ValueError("The version number supported is 1 or 2.")
 
 
-def create_fts_table(cursor, version=2):
+def create_fts_table(con, version=2):
     """This function creates a FTS3 table in the database from cursor to index
     the comits by message and easily filtrate by this column.
     The process is inline.
     """
+    cursor = con.cursor()
     # the creation of the table is always the same regardless of the version
-    cursor.execute("DROP TABLE IF EXISTS commit_texts;")
-    cursor.execute("""CREATE VIRTUAL TABLE commit_texts USING fts3(
+    # cursor.execute("DROP TABLE IF EXISTS commit_texts;") 
+    cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING fts3(
                     commit_hash VARCHAR(40) NOT NULL,
                     message TEXT,
                     lines_added INT,
@@ -101,6 +103,7 @@ def create_fts_table(cursor, version=2):
 
     insert_text = get_insert(version)
     cursor.execute(insert_text)
+    con.commit()
 
 
 def get_commits_from_issue(issue_id: str, connection: sqlite3.Connection):
@@ -162,6 +165,20 @@ def add_changes_metrics(df, connection):
     return out_df
 
 
+def parse_date(x):
+    if type(x) == str:
+        if "T" in x:
+            return dt.datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.000+0000")
+        elif x == "":
+            return pd.NaT
+        else:
+            return dt.datetime.strptime(x, "%Y-%m-%d %H:%M:%S +0000")
+    elif type(x) == dt.datetime:
+        return x
+    else:
+        raise ValueError("Type incorrect")
+
+
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('output_filepath', type=click.Path())
@@ -179,15 +196,13 @@ def main(input_filepath, output_filepath):
     # connection and cursor of version 1
     version1_path = f"{input_filepath}/{VERSION1}"
     con1 = sqlite3.connect(version1_path)
-    cursor1 = con1.cursor()
 
     # connection and cursor of version 2
     version2_path = f"{input_filepath}/{VERSION2}"
     con2 = sqlite3.connect(version2_path)
-    cursor2 = con2.cursor()
 
-    create_fts_table(cursor1, 1)
-    create_fts_table(cursor2, 2)
+    create_fts_table(con1, 1)
+    create_fts_table(con2, 2)
 
     select_columns = ["key", "project_id", "creation_date", "resolution_date",
                       "summary", "description", "type"]  # jira columns
@@ -203,6 +218,14 @@ def main(input_filepath, output_filepath):
     full_df2 = add_changes_metrics(jira2, con2)
 
     final = pd.merge(full_df1, full_df2, how="outer")
+
+    ### COMPUTE THE DURATION ###
+
+    finished = final[~final["resolution_date"].isna()]
+    durations = finished["resolution_date"].apply(parse_date) - finished["creation_date"].apply(parse_date)
+    finished["duration"] = [d.days*24 + d.seconds/3600 for d in durations]
+
+    final = final.join(finished["duration"])
 
     final.to_csv(f"{output_filepath}/issues_with_metrics.csv")
 
