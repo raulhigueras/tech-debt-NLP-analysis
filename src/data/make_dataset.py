@@ -120,7 +120,7 @@ def get_commits_from_issue(issue_id: str, connection: sqlite3.Connection):
                         WHERE message MATCH '\"{issue_id}\"'"""
     df = pd.read_sql(commits_query, connection)
 
-    return (issue_id, df["lines_added"].sum(), df["lines_removed"].sum(),
+    return (issue_id, len(df), df["lines_added"].sum(), df["lines_removed"].sum(),
             df["files"].sum())
 
 
@@ -159,8 +159,9 @@ def add_changes_metrics(df, connection):
     metrics = df["key"].apply(get_commits_from_issue, args=(connection,))
 
     out_df["lines_added"] = list(map(lambda x: x[1], metrics))
-    out_df["lines_removed"] = list(map(lambda x: x[2], metrics))
-    out_df["files_changed"] = list(map(lambda x: x[3], metrics))
+    out_df["num_commits"] = list(map(lambda x: x[2], metrics))
+    out_df["lines_removed"] = list(map(lambda x: x[3], metrics))
+    out_df["files_changed"] = list(map(lambda x: x[4], metrics))
 
     return out_df
 
@@ -204,6 +205,8 @@ def main(input_filepath, output_filepath):
     create_fts_table(con1, 1)
     create_fts_table(con2, 2)
 
+    logger.info("FTS tables present!")
+
     select_columns = ["key", "project_id", "creation_date", "resolution_date",
                       "summary", "description", "type"]  # jira columns
     jira_query = """SELECT * FROM JIRA_ISSUES"""
@@ -217,13 +220,16 @@ def main(input_filepath, output_filepath):
     full_df1 = add_changes_metrics(jira1, con1)
     full_df2 = add_changes_metrics(jira2, con2)
 
+    con1.close()
+    con2.close()
+
     final = pd.merge(full_df1, full_df2, how="outer")
 
     ### COMPUTE THE DURATION ###
 
     finished = final[~final["resolution_date"].isna()]
     durations = finished["resolution_date"].apply(parse_date) - finished["creation_date"].apply(parse_date)
-    finished["duration"] = [d.days*24 + d.seconds/3600 for d in durations]
+    finished.loc[:,"duration"] = [d.days*24 + d.seconds/3600 for d in durations]
 
     final = final.join(finished["duration"])
 

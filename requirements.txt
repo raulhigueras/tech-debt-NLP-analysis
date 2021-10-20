@@ -18,3 +18,4 @@ nltk
 gensim==3.8.3
 pyLDAvis==3.2.1
 tqdm
+sklearn
