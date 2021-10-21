@@ -76,18 +76,18 @@ def main(data_src, interim_filepath):
 
     logger = logging.getLogger(__name__)
 
-
     logger.info("Reading processed dataset...")
     df = pd.read_csv(data_src, index_col=0)
     df.dropna(subset = ["project_id"], inplace=True)
     df['description'] = df['description'].fillna('')
-
 
     logger.info("Applying NLP text preprocessing methods...")
     pnames = {" " + name.split(":")[-1] + " " for name in set(df['project_id']) }
 
     df['summary'] = unifyStyle(df['summary'])
     df['description'] = unifyStyle(df['description'])
+
+    inter_text = df['summary'] + ' ' + df['description']
 
     df['summary'] = removeStopwordsandStemmer(df['summary'])
     df['description'] = removeStopwordsandStemmer(df['description'])
@@ -96,6 +96,7 @@ def main(data_src, interim_filepath):
     df['description'] = removeProjectSpecificTerms(df['description'], pnames)
 
     df['text'] = df['summary'] + ' ' + df['description']
+    df['inter_text'] = inter_text
     df = df.drop(columns=['summary', 'description'])
 
     logger.info("Done! Saving intermediate dataset with preprocessed text")
