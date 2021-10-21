@@ -90,9 +90,9 @@ def create_fts_table(con, version=2):
     the comits by message and easily filtrate by this column.
     The process is inline.
     """
-    cursor = con.cursor("IF EXISTS commit_texts")
-    exist_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='commit_texts-nono';"
-    if not len(cursor.execute(exist_query).fetchall()) > 0
+    cursor = con.cursor()
+    exist_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='commit_texts';"
+    if not (len(cursor.execute(exist_query).fetchall()) > 0):
         # the creation of the table is always the same regardless of the version
         # cursor.execute("DROP TABLE IF EXISTS commit_texts;") 
         cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING fts3(
