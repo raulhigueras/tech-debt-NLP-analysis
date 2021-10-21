@@ -39,17 +39,16 @@ def download_data_from_github(folder_path):
     # extract the database from the .zip file and remove the old zip.
     with zipfile.ZipFile(f"{folder_path}/{VERSION1}.zip", 'r') as zip_ref:
         files_in = zip_ref.namelist()
-        print(files_in)
         my_file = [x for x in files_in if ".db" in x]
         if len(my_file) > 0:
             name_of_file = my_file[0]
 
         zip_ref.extract(name_of_file, f"{folder_path}/data")
     
-    sh.move(f"{folder_path}/data/*.db", f"{folder_path}/{VERSION1}")
+    sh.move(f"{folder_path}/data/TechnicalDebtDataset_20200606.db", f"{folder_path}/{VERSION1}")
 
     os.remove(f"{folder_path}/{VERSION1}.zip")
-    os.remove(f"{folder_path}/data")
+    sh.rmtree(f"{folder_path}/data")
 
     # get the database of the v2
     r = requests.get(link_v2)
