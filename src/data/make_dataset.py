@@ -159,8 +159,8 @@ def add_changes_metrics(df, connection):
     out_df = df.copy()
     metrics = df["key"].apply(get_commits_from_issue, args=(connection,))
 
-    out_df["lines_added"] = list(map(lambda x: x[1], metrics))
-    out_df["num_commits"] = list(map(lambda x: x[2], metrics))
+    out_df["num_commits"] = list(map(lambda x: x[1], metrics))
+    out_df["lines_added"] = list(map(lambda x: x[2], metrics))
     out_df["lines_removed"] = list(map(lambda x: x[3], metrics))
     out_df["files_changed"] = list(map(lambda x: x[4], metrics))
 
