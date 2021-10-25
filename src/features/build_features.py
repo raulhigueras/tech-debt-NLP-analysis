@@ -82,7 +82,7 @@ def main(data_src, interim_filepath):
     df['description'] = df['description'].fillna('')
 
     logger.info("Applying NLP text preprocessing methods...")
-    pnames = {" " + name.split(":")[-1] + " " for name in set(df['project_id']) }
+    pnames = {name.split(":")[-1] for name in set(df['project_id']) }
 
     df['summary'] = unifyStyle(df['summary'])
     df['description'] = unifyStyle(df['description'])
