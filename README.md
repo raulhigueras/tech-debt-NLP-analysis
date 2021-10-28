@@ -62,6 +62,9 @@ The multiple models tested along with the results can be found in the following 
 The evaluation of the trained models can be found in their respectives notebooks.
 
 ### Deploy
+
+![](reports/figures/deploy_img.png)
+
 After training the models (`make models`), the demo script can be executed with the following command:
 ```{bash}
 make deploy
