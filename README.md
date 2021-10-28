@@ -14,17 +14,20 @@ Natural Language Processing analysis of developers' written messages in the Tech
 - [x] Problem Understanding
 - [x] Data Exploration 
 - [x] Data Preprocessing
-- [ ] Modeling
-- [ ] Evaluation
-- [ ] Deploy
+- [x] Modeling
+- [x] Evaluation
+- [x] Deploy
+
+All finished! 😊
 
 
 ## Instructions of use
 
 ### Setup
-First of all, run the following command to install all the python libraries needed.
+First of all, run the following commands to install all the requirements and download the dataset.
 ```{bash}
 make requirements
+make data
 ```
 
 ### Data Exploration
@@ -32,55 +35,62 @@ The data exploration part is all contained in the notebook `001-exploration.ipyn
 
 > ❗️ Warning
 >
-> Make sure to include both versions of the databases (`td_V1.bd` and `td_V2.bd`) in the folder `data/raw`.
+> Make sure that the command `make data` was executed without errors before trying to run the notebook.
 
 ### Data Preprocessing 
-To generate the processed dataset, run the following command:
-```{bash}
-make data
-```
+The data to download the data also applies the first preprocessing steps. Those functions join both versions of the data and generate the preprocessed dataset used later on.
 
-The NLP preprocessing techniques are detailed and explained in the notebook `002-preprocessing.ipynb`. Those techniques are implemented just after the modelling step, and can be executed following the instructions at [Modeling](###modeling).
-
-### 🚧 Modeling 🚧
-To generate the features, run the followig command:
+### Modeling
+The first step of the modeling is to  generate the features. This could be done running the command:
 ```{bash}
 make features
 ```
+The process of computing the features is broadly explained in the notebook `002-preprocessing.ipynb`.
 
-### 🚧 Evaluation 🚧
-WIP
+Then, to train the models, run:
+```{bash}
+make models
+```
+The multiple models tested along with the results can be found in the following notebooks: 
 
-### 🚧 Deploy 🚧
-WIP
+- Topic modeling: `003-topicmodels.ipynb`.
+- Regression: `004-regression.ipynb`.
+- Classification: `005-classification.ipynb`.
+
+
+### Evaluation 
+The evaluation of the trained models can be found in their respectives notebooks.
+
+### Deploy
+After training the models (`make models`), the demo script can be executed with the following command:
+```{bash}
+make deploy
+```
+That will open a tab in an internet browser. Using Google Chrome is recommended.
+
 
 ## Project Organization
 ------------
 
     ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
+    ├── Makefile           
+    ├── README.md          
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
     │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
+    ├── notebooks          <- Jupyter notebooks.
     │
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
     │
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
     │   └── figures        <- Generated graphics and figures to be used in reporting
     │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
+    ├── requirements.txt   <- The requirements file for reproducing the analysis environment
     │
     ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
     ├── src                <- Source code for use in this project.
