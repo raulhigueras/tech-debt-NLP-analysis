@@ -88,12 +88,12 @@ def raw_text_to_df(text):
 
 def text_to_svd_vector(text):
     # load tfidf
-    tfidf = pickle.load(open("../../models/tfidf.pkl", 'rb'))
+    tfidf = pickle.load(open("models/vect.pickle", 'rb'))
 
     vectorized = tfidf.transform(text['text'])
 
     # load svd
-    svd = pickle.load(open("../../models/svd.pkl", "rb"))
+    svd = pickle.load(open("models/svd.pickle", "rb"))
 
     truncated = svd.transform(vectorized)
 
@@ -102,14 +102,14 @@ def text_to_svd_vector(text):
 
 def svd_vector_to_difficulty(embedding, issue_type):
     # load one hot encoding model
-    enc = pickle.load(open("../../models/onehotenc.pkl", 'rb'))
+    enc = pickle.load(open("models/onehot.pickle", 'rb'))
 
     types_one_hot = enc.transform(
         np.asarray(pd.Series(issue_type)).reshape(-1, 1)).todense()
     data = np.hstack((embedding, types_one_hot))
 
     # load logistic regressor
-    model = pickle.load(open("../../models/classifier3.pkl", 'rb'))
+    model = pickle.load(open("models/mlp.pickle", 'rb'))
 
     predicted_class = model.predict(data)
 
@@ -118,14 +118,14 @@ def svd_vector_to_difficulty(embedding, issue_type):
 
 def text_to_tf(text):
     # load tf
-    id2word = pickle.load(open("../../models/idword.pkl", 'rb'))
+    id2word = pickle.load(open("models/id2word.pickle", 'rb'))
 
     return id2word.doc2bow(text['text'].values[0].split(" "))
 
 
 def bow_to_topic(embedding):
     # load lda
-    lda = LdaModel.load("../../models/lda_model_files/lda.model")
+    lda = LdaModel.load("models/lda11")
 
     # topic probability distribution
     topic_distribution = lda[embedding]

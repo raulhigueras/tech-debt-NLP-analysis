@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3 models
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -29,9 +29,17 @@ requirements: test_environment
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
 
-## Make Dataset
+## Make Features
 features: data/processed/issues_with_metrics.csv
 	$(PYTHON_INTERPRETER) src/features/build_features.py data/processed/issues_with_metrics.csv data/interim
+
+## Train models
+models: data/interim/preproc.csv
+	$(PYTHON_INTERPRETER) src/models/train_model.py data/interim/preproc.csv models
+
+## Show demo
+deploy: models/mlp.pickle models/lda11.pickle
+	streamlit run src/visualization/deployment.py
 
 ## Delete all compiled Python files
 clean:
