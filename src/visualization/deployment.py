@@ -1,8 +1,11 @@
 import streamlit as st
-from utils import *
+from utils import text_to_tf, bow_to_topic, text_to_svd_vector,\
+    svd_vector_to_difficulty, raw_text_to_df
 
-issue_type_list = ("Bug", "Dependency upgrade", "Documentation", "Epic", "Improvement", "New Feature", "Project",
-                   "Question", "RTC", "Story", "Sub-task", "Task", "Technical task", "Test", "Umbrella", "Wish")
+issue_type_list = ("Bug", "Dependency upgrade", "Documentation", "Epic",
+                   "Improvement", "New Feature", "Project", "Question", "RTC",
+                   "Story", "Sub-task", "Task", "Technical task", "Test",
+                   "Umbrella", "Wish")
 
 
 def get_topic_and_commonness(text):
@@ -35,7 +38,7 @@ def main():
 
     if st.button("Run the models!"):
 
-        if input_text is not "" or input_text is not " ":
+        if input_text != "" or input_text != " ":
 
             column1, column2 = st.columns(2)
 
@@ -56,17 +59,17 @@ def main():
             with column1.expander("Get information about the topics"):
                 st.write("""
                 Topic commonness:
-                - ⭐️⭐️⭐️**Very common**: represents more than 40% of the issues.
-                - ⭐️⭐**️️Common**: represents between the 5% and 40% of the issues. 
-                - ⭐**Rare**: represents less than 5% of the issues. 
+                - ⭐️⭐️⭐️**Very common**: more than 40% of the issues.
+                - ⭐️⭐**️️Common**: between the 5% and 40% of the issues.
+                - ⭐**Rare**: less than 5% of the issues.
                 """)
 
             with column2.expander("Get information about the difficulty"):
                 st.write("""
-                Issue difficulty metric: 
-                - ❗**️Easy**: requires adding less than 15 lines in average. 
-                - ❗️❗️**Medium**: requires adding between 15 and 115 lines in average. 
-                - ❗️❗️❗**️Hard**: requires adding more than 115 lines in average. 
+                Issue difficulty metric:
+                - ❗**️Easy**: adding less than 15 lines in average.
+                - ❗️❗️**Medium**: adding between 15 and 115 lines in average.
+                - ❗️❗️❗**️Hard**: adding more than 115 lines in average.
                 """)
         else:
             st.write("You must enter an issue description or summary!")

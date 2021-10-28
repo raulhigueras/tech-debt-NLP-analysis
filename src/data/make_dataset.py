@@ -28,8 +28,10 @@ def download_data_from_github(folder_path):
     if VERSION1 in raw_files and VERSION2 in raw_files:
         return
     # else, download the data from github.
-    link_v1 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/download/1.0.1/TechnicalDebtDataset_v1.01.db.zip"
-    link_v2 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/download/2.0/td_V2.db"
+    link_v1 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/\
+               download/1.0.1/TechnicalDebtDataset_v1.01.db.zip"
+    link_v2 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/\
+               download/2.0/td_V2.db"
 
     # get the .zip file of the v1
     r = requests.get(link_v1)
@@ -44,8 +46,9 @@ def download_data_from_github(folder_path):
             name_of_file = my_file[0]
 
         zip_ref.extract(name_of_file, f"{folder_path}/data")
-    
-    sh.move(f"{folder_path}/data/TechnicalDebtDataset_20200606.db", f"{folder_path}/{VERSION1}")
+
+    sh.move(f"{folder_path}/data/TechnicalDebtDataset_20200606.db",
+            f"{folder_path}/{VERSION1}")
 
     os.remove(f"{folder_path}/{VERSION1}.zip")
     sh.rmtree(f"{folder_path}/data")
@@ -91,11 +94,12 @@ def create_fts_table(con, version=2):
     The process is inline.
     """
     cursor = con.cursor()
-    exist_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='commit_texts';"
+    exist_query = "SELECT name FROM sqlite_master WHERE type='table' \
+                   AND name='commit_texts';"
     if not (len(cursor.execute(exist_query).fetchall()) > 0):
-        # the creation of the table is always the same regardless of the version
-        # cursor.execute("DROP TABLE IF EXISTS commit_texts;") 
-        cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING fts3(
+        # creation of the table is always the same regardless of the version
+        cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING
+                        fts3(
                         commit_hash VARCHAR(40) NOT NULL,
                         message TEXT,
                         lines_added INT,
@@ -121,8 +125,8 @@ def get_commits_from_issue(issue_id: str, connection: sqlite3.Connection):
                         WHERE message MATCH '\"{issue_id}\"'"""
     df = pd.read_sql(commits_query, connection)
 
-    return (issue_id, len(df), df["lines_added"].sum(), df["lines_removed"].sum(),
-            df["files"].sum())
+    return (issue_id, len(df), df["lines_added"].sum(),
+            df["lines_removed"].sum(), df["files"].sum())
 
 
 # simple dictionary to rename the columns from v1 to the standard.
@@ -226,11 +230,12 @@ def main(input_filepath, output_filepath):
 
     final = pd.merge(full_df1, full_df2, how="outer")
 
-    ### COMPUTE THE DURATION ###
-
+    # COMPUTE THE DURATION
     finished = final[~final["resolution_date"].isna()]
-    durations = finished["resolution_date"].apply(parse_date) - finished["creation_date"].apply(parse_date)
-    finished.loc[:,"duration"] = [d.days*24 + d.seconds/3600 for d in durations]
+    durations = finished["resolution_date"].apply(parse_date) -\
+        finished["creation_date"].apply(parse_date)
+    finished.loc[:, "duration"] = [d.days*24 + d.seconds/3600
+                                   for d in durations]
 
     final = final.join(finished["duration"])
 

@@ -5,46 +5,48 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 
 # my imports
-import os
 import re
 import pandas as pd
-import requests
-import zipfile
 import nltk
-
-#nltk.download('punkt')
-#nltk.download('stopwords')
-nltk.download('wordnet')
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+nltk.download('wordnet')
 
 
 def unifyStyle(txts):
-    txts = txts.apply( lambda txt: str(txt).lower() )
+    txts = txts.apply(lambda txt: str(txt).lower())
 
     brackets_re = r'\[+(.*?)\]+|\{+(.*?)\}+'
-    URL_re = r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+    URL_re = r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]\
+               {1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
     PATH_re = r'(\/)*[\w\-\_.\<\>]+(\/[\w\-\_.\<\>\=]+)+'
     version_re = r'\d+(\.\d+)+'
     file_re = r'[\w\-\_]+(\.[\w\-\_\=]+)+'
-    date_re = r'(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})'
+    date_re = r'(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct\
+                |Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|\
+                Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)\
+                ?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\
+                \d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|\
+                [3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?\
+                [1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|\
+                (?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})'
     punctuation_re = r'[^\w\s]'
     multiplespace_re = r'  +'
 
-    txts = txts.apply( lambda txt: txt.replace('\r', ' '))
-    txts = txts.apply( lambda txt: txt.replace('\n', ' '))
-    txts = txts.apply( lambda txt: re.sub(brackets_re, '', txt) )
-    txts = txts.apply( lambda txt: re.sub(URL_re, 'URL', txt) )
-    txts = txts.apply( lambda txt: re.sub(PATH_re, ' ', txt) )
-    txts = txts.apply( lambda txt: re.sub(version_re, ' ', txt) )
-    txts = txts.apply( lambda txt: re.sub(file_re, ' ', txt) )
-    txts = txts.apply( lambda txt: re.sub(date_re, 'DATE', txt) )
-    txts = txts.apply( lambda txt: re.sub(punctuation_re, ' ', txt) )
-    txts = txts.apply( lambda txt: re.sub(multiplespace_re, ' ', txt) )
+    txts = txts.apply(lambda txt: txt.replace('\r', ' '))
+    txts = txts.apply(lambda txt: txt.replace('\n', ' '))
+    txts = txts.apply(lambda txt: re.sub(brackets_re, '', txt))
+    txts = txts.apply(lambda txt: re.sub(URL_re, 'URL', txt))
+    txts = txts.apply(lambda txt: re.sub(PATH_re, ' ', txt))
+    txts = txts.apply(lambda txt: re.sub(version_re, ' ', txt))
+    txts = txts.apply(lambda txt: re.sub(file_re, ' ', txt))
+    txts = txts.apply(lambda txt: re.sub(date_re, 'DATE', txt))
+    txts = txts.apply(lambda txt: re.sub(punctuation_re, ' ', txt))
+    txts = txts.apply(lambda txt: re.sub(multiplespace_re, ' ', txt))
 
-    return txts    
+    return txts
 
 
 def removeStopwordsandStemmer(txts):
@@ -52,10 +54,12 @@ def removeStopwordsandStemmer(txts):
 
     sw = stopwords.words('english')
     words_wo_sw = [[word for word in txt if word not in sw] for txt in words]
-    words_wo_sw = [[word for word in txt if not word.isnumeric()] for txt in words_wo_sw]
+    words_wo_sw = [[word for word in txt if not word.isnumeric()]
+                   for txt in words_wo_sw]
 
     lemmatizer = WordNetLemmatizer()
-    words_wo_sw = [[lemmatizer.lemmatize(w) for w in txt] for txt in words_wo_sw ]
+    words_wo_sw = [[lemmatizer.lemmatize(w) for w in txt]
+                   for txt in words_wo_sw]
 
     txts = pd.Series([' '.join(txt) for txt in words_wo_sw])
 
@@ -78,11 +82,12 @@ def main(data_src, interim_filepath):
 
     logger.info("Reading processed dataset...")
     df = pd.read_csv(data_src, index_col=0)
-    df.dropna(subset = ["project_id"], inplace=True)
+    df.dropna(subset=["project_id"], inplace=True)
     df['description'] = df['description'].fillna('')
 
     logger.info("Applying NLP text preprocessing methods...")
-    pnames = {name.split(":")[-1] for name in set(df['project_id']) }
+    pnames = {" " + name.split(":")[-1] + " "
+              for name in set(df['project_id'])}
 
     df['summary'] = unifyStyle(df['summary'])
     df['description'] = unifyStyle(df['description'])
