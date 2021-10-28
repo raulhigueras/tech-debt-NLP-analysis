@@ -38,7 +38,7 @@ models: data/interim/preproc.csv
 	$(PYTHON_INTERPRETER) src/models/train_model.py data/interim/preproc.csv models
 
 ## Show demo
-deploy: models/mlp.pickle models/lda11.pickle
+deploy: models/mlp.pickle models/lda11
 	streamlit run src/visualization/deployment.py
 
 ## Delete all compiled Python files
