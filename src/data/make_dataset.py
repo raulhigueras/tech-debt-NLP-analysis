@@ -28,8 +28,10 @@ def download_data_from_github(folder_path):
     if VERSION1 in raw_files and VERSION2 in raw_files:
         return
     # else, download the data from github.
-    link_v1 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/download/1.0.1/TechnicalDebtDataset_v1.01.db.zip"
-    link_v2 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/download/2.0/td_V2.db"
+    link_v1 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/\
+               download/1.0.1/TechnicalDebtDataset_v1.01.db.zip"
+    link_v2 = "https://github.com/clowee/The-Technical-Debt-Dataset/releases/\
+               download/2.0/td_V2.db"
 
     # get the .zip file of the v1
     r = requests.get(link_v1)
@@ -39,17 +41,17 @@ def download_data_from_github(folder_path):
     # extract the database from the .zip file and remove the old zip.
     with zipfile.ZipFile(f"{folder_path}/{VERSION1}.zip", 'r') as zip_ref:
         files_in = zip_ref.namelist()
-        print(files_in)
         my_file = [x for x in files_in if ".db" in x]
         if len(my_file) > 0:
             name_of_file = my_file[0]
 
         zip_ref.extract(name_of_file, f"{folder_path}/data")
-    
-    sh.move(f"{folder_path}/data/*.db", f"{folder_path}/{VERSION1}")
+
+    sh.move(f"{folder_path}/data/TechnicalDebtDataset_20200606.db",
+            f"{folder_path}/{VERSION1}")
 
     os.remove(f"{folder_path}/{VERSION1}.zip")
-    os.remove(f"{folder_path}/data")
+    sh.rmtree(f"{folder_path}/data")
 
     # get the database of the v2
     r = requests.get(link_v2)
@@ -92,18 +94,21 @@ def create_fts_table(con, version=2):
     The process is inline.
     """
     cursor = con.cursor()
-    # the creation of the table is always the same regardless of the version
-    # cursor.execute("DROP TABLE IF EXISTS commit_texts;") 
-    cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING fts3(
-                    commit_hash VARCHAR(40) NOT NULL,
-                    message TEXT,
-                    lines_added INT,
-                    lines_removed INT,
-                    files INT);""")
+    exist_query = "SELECT name FROM sqlite_master WHERE type='table' \
+                   AND name='commit_texts';"
+    if not (len(cursor.execute(exist_query).fetchall()) > 0):
+        # creation of the table is always the same regardless of the version
+        cursor.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS commit_texts USING
+                        fts3(
+                        commit_hash VARCHAR(40) NOT NULL,
+                        message TEXT,
+                        lines_added INT,
+                        lines_removed INT,
+                        files INT);""")
 
-    insert_text = get_insert(version)
-    cursor.execute(insert_text)
-    con.commit()
+        insert_text = get_insert(version)
+        cursor.execute(insert_text)
+        con.commit()
 
 
 def get_commits_from_issue(issue_id: str, connection: sqlite3.Connection):
@@ -120,8 +125,8 @@ def get_commits_from_issue(issue_id: str, connection: sqlite3.Connection):
                         WHERE message MATCH '\"{issue_id}\"'"""
     df = pd.read_sql(commits_query, connection)
 
-    return (issue_id, len(df), df["lines_added"].sum(), df["lines_removed"].sum(),
-            df["files"].sum())
+    return (issue_id, len(df), df["lines_added"].sum(),
+            df["lines_removed"].sum(), df["files"].sum())
 
 
 # simple dictionary to rename the columns from v1 to the standard.
@@ -158,8 +163,8 @@ def add_changes_metrics(df, connection):
     out_df = df.copy()
     metrics = df["key"].apply(get_commits_from_issue, args=(connection,))
 
-    out_df["lines_added"] = list(map(lambda x: x[1], metrics))
-    out_df["num_commits"] = list(map(lambda x: x[2], metrics))
+    out_df["num_commits"] = list(map(lambda x: x[1], metrics))
+    out_df["lines_added"] = list(map(lambda x: x[2], metrics))
     out_df["lines_removed"] = list(map(lambda x: x[3], metrics))
     out_df["files_changed"] = list(map(lambda x: x[4], metrics))
 
@@ -225,11 +230,12 @@ def main(input_filepath, output_filepath):
 
     final = pd.merge(full_df1, full_df2, how="outer")
 
-    ### COMPUTE THE DURATION ###
-
+    # COMPUTE THE DURATION
     finished = final[~final["resolution_date"].isna()]
-    durations = finished["resolution_date"].apply(parse_date) - finished["creation_date"].apply(parse_date)
-    finished.loc[:,"duration"] = [d.days*24 + d.seconds/3600 for d in durations]
+    durations = finished["resolution_date"].apply(parse_date) -\
+        finished["creation_date"].apply(parse_date)
+    finished.loc[:, "duration"] = [d.days*24 + d.seconds/3600
+                                   for d in durations]
 
     final = final.join(finished["duration"])
 
