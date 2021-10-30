@@ -2,6 +2,12 @@
 
 Natural Language Processing analysis of developers' written messages in the Technical Debt Database to predict issues' difficulty.
 
+There are two objectives of this analysis:
+ - Study the topic distribution among the descriptions of issues.
+ - Find if it is possible to predict the difficulty of issues using their descriptions.
+
+More detailed information about the objective and the results can be found in the report in the directory `reports`.
+
 ## Table of Content
 
 1. [Project Status](#project-status)
